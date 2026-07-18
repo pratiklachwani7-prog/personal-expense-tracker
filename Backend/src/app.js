@@ -8,21 +8,35 @@ app.use(express.json());
 
 const upload = multer( { storage : multer.memoryStorage() } )
 
-app.post("/add-Expense" , upload.single("bill") ,async (req , res) => 
+app.post("/add-Expense" , upload.single("bill") , async (req , res) => 
 {
-    console.log(req.body) ;   
-    console.log(req.file) ;
-
-    console.log("The result is :- ") ;
     const result = await uploadImage(req.file.buffer) ;
     console.log(result) ;
-    expenseModel.create({
+    const post = await expenseModel.create({
         amount : req.body.amount , 
         description : req.body.description ,
         category : req.body.category ,
         date : req.body.date ,
-        bill : req.file.url ,
+        bill : result.url ,
+    })
+
+    res.status(201).json({
+        message:"Expenses Added Successfully" ,
+        post
+    })
+
+})
+
+app.get("/save-Expenses" , async (req , res) => {
+    
+    const posts = await expenseModel.find() ;
+
+    res.status(200).json({
+        message:"Expenses Fetched Successfully" ,
+        posts ,
     })
 })
+
+
 
 module.exports = app ;
